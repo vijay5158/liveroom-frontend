@@ -1,5 +1,36 @@
-# [Backend](https://github.com/vijay5158/liveroom-backend/)
+# Introduction -
+It is a single page web application which provides many
+ great functionalities to Schools or Colleges in this pandemic , it gives teachers authority to create and add students to real time virtual class group and share study
+materials and take assessments and announce anything. It is built using React/Redux, JavaScript and CSS.
 
+# Here is the backend
+[Backend](https://github.com/vijay5158/liveroom-backend/)
+
+# Project Status
+This project is currently in development. Here are some more upcoming features-
+- Smart assessment feature (Auto assessment making using only picture of test written on paper by text recognition.)
+- Inhancement in class room (Student and teacher interaction by video conferencing).
+- and many more features.
+
+## Installation and Setup Instructions.
+
+Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
+
+Installation:
+
+`npm install`  
+
+To Run Test Suite:  
+
+`npm test`  
+
+To Start Server:
+
+`npm start`  
+
+To Visit App:
+
+`localhost:3000/`  
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
