@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { authLogin } from "../../actions/authAction";
+import { useAuth } from '../../reducers/authReducer';
 
 
 
@@ -20,7 +21,9 @@ const handleSlide = () => {
 }
 
 function Login(props) {
-    const history = useHistory();
+    const authData = useAuth();
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const initialFormDataLogin = Object.freeze({
         email: '',
@@ -44,10 +47,10 @@ function Login(props) {
     const handleSubmitLogin = (event) => {
         event.preventDefault()
         const { email, password } = formDataLogin;
-        props.login(email, password)
+        dispatch(authLogin(email, password));
 
         handleClose();
-        history.push('/');
+        navigate('/');
         setFormDataLogin(lastFormDataLogin);
     }
 
@@ -55,7 +58,7 @@ function Login(props) {
     useEffect(handleSlide, [loginContainer])
     return (
         <div>
-            <div className="container" id="loginContainer">
+            <div className="container w-[100%]" id="loginContainer">
 
                 <div className="forms-container">
                     <div className="signin-signup">
@@ -123,21 +126,23 @@ function Login(props) {
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        loading: state.auth.loading,
-        error: state.auth.error,
-        token: state.auth.token
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         loading: state.auth.loading,
+//         error: state.auth.error,
+//         token: state.auth.token
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        login: (email, password) => dispatch(authLogin(email, password))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         login: (email, password) => dispatch(authLogin(email, password))
+//     };
+// };
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Login);
+// export default connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Login);
+
+export default Login;

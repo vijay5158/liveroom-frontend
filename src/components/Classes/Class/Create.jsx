@@ -6,12 +6,13 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import React, { useState } from 'react';
-import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { connect, useDispatch } from "react-redux";
 import { createCLS, getCLS } from "../../../actions/classAction";
+import { useAuth } from "../../../reducers/authReducer";
 
 function CreateClass(props) {
-   
+   const authData = useAuth();
+   const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
     const initialFormData = Object.freeze({
         classname: '',
@@ -33,10 +34,10 @@ function CreateClass(props) {
             class_name : FormData.classname,
             standard : FormData.standard,
             subject : FormData.subject,
-            teachers : props.email
+            teachers : authData?.email
         }
         console.log(cls)
-        props.createCLS(props.token,cls);
+        dispatch(createCLS(authData?.token,cls));
         setOpen(false);
     }
 
@@ -108,22 +109,24 @@ function CreateClass(props) {
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        email: state.authReducer.email,
-        loading: state.authReducer.loading,
-        token: state.authReducer.token
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         email: state.authReducer.email,
+//         loading: state.authReducer.loading,
+//         token: state.authReducer.token
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        createCLS: (token, cls) => dispatch(createCLS(token,cls)),
-        getCLS: (token) => dispatch(getCLS(token))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         createCLS: (token, cls) => dispatch(createCLS(token,cls)),
+//         getCLS: (token) => dispatch(getCLS(token))
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(CreateClass));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(CreateClass));
+
+export default CreateClass;

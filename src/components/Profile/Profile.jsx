@@ -4,10 +4,11 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HomeIcon from "@material-ui/icons/Home";
 import FormData from 'form-data';
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { useHistory, withRouter } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { logout, updateUserData } from "../../actions/authAction";
 import './profile.css';
+import { useAuth } from "../../reducers/authReducer";
 
 const StyledBreadcrumb = withStyles((theme) => ({
     root: {
@@ -26,23 +27,24 @@ const StyledBreadcrumb = withStyles((theme) => ({
 }))(Chip);
 
 function Profile(props) {
-    const history = useHistory()
+    const authData = useAuth();
+    const dispatch = useDispatch();
+    const navigate = useNavigate()
     function handleClick(event) {
         event.preventDefault();
-        history.push('/');
+        navigate('/');
     }
 
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user == null) {
+    if (!authData.token) {
 
-        history.push('/')
+        navigate('/')
     }
     const initialUserData = Object.freeze({
-        first_name: props.firstName,
-        last_name: props.lastName,
+        first_name: authData?.firstName,
+        last_name: authData?.lastName,
         password: '',
-        email: props.email,
-        mobile: props.mobile,
+        email: authData?.email,
+        mobile: authData?.mobile,
 
     })
     useEffect(() => {
@@ -88,7 +90,7 @@ function Profile(props) {
 
         }
 
-        props.updateUserData(updatedData, props.userId, props.token);
+        dispatch(updateUserData(updatedData, authData?.userId, authData?.token));
         setEditMode(false)
         document.getElementById('password').value = '';
     }
@@ -120,7 +122,7 @@ function Profile(props) {
                                 <div className="card-body">
                                     <div className="profile-img">
                                         <div style={{ display: 'flex', flexDirection: 'row' }} >
-                                            <img src={(props.profileImg) ? props.profileImg : "https://bootdey.com/img/Content/avatar/avatar7.png"} alt="Admin"
+                                            <img src={(authData?.profileImg) ? authData?.profileImg : "https://bootdey.com/img/Content/avatar/avatar7.png"} alt="Admin"
                                                 className="rounded-circle" style={{ width: '9rem', borderRadius: '50%' }} />
                                             {(editMode) ? <> <Edit />
                                                 <Input type="file" id="profile_img"
@@ -132,7 +134,7 @@ function Profile(props) {
                                         </div>
                                         <div style={{ marginTop: '1rem' }}>
                                             <h4 style={{ fontSize: '1.5rem', color: '#58418b' }}>{userData.firstName}</h4>
-                                            <h5 className="text-secondary mb-1" style={{ marginBottom: '0.25rem', fontSize: '1rem', color: '#d14467' }}>{(props.isStudent) ? 'Student' : 'Teacher'}</h5>
+                                            <h5 className="text-secondary mb-1" style={{ marginBottom: '0.25rem', fontSize: '1rem', color: '#d14467' }}>{(authData?.is_student) ? 'Student' : 'Teacher'}</h5>
                                         </div>
                                     </div>
                                 </div>
@@ -221,7 +223,7 @@ function Profile(props) {
                                 <div className="card-body">
                                     <div className="row1">
                                         <div className="col-3" >
-                                            <h3 style={{ marginBottom: '0' }} style={{ color: '#f74754' }}>First Name</h3>
+                                            <h3 style={{ color: '#f74754',marginBottom: '0'  }}>First Name</h3>
                                         </div>
                                         <Input className="col-9 text-secondary" onChange={handleChange} name='first_name' readOnly={(editMode) ? false : true} disableUnderline={(editMode) ? false : true} defaultValue={userData.first_name} />
 
@@ -229,7 +231,7 @@ function Profile(props) {
                                     <hr />
                                     <div className="row1">
                                         <div className="col-3">
-                                            <h3 style={{ marginBottom: '0' }} style={{ color: '#e6455c' }}>Last Name</h3>
+                                            <h3 style={{ color: '#e6455c',marginBottom: '0'  }}>Last Name</h3>
                                         </div>
                                         <Input className="col-9 text-secondary" onChange={handleChange} name='last_name' readOnly={(editMode) ? false : true} disableUnderline={(editMode) ? false : true} defaultValue={userData.last_name} />
 
@@ -237,7 +239,7 @@ function Profile(props) {
                                     <hr />
                                     <div className="row1">
                                         <div className="col-3">
-                                            <h3 style={{ marginBottom: '0' }} style={{ color: '#d14467' }}>Email</h3>
+                                            <h3 style={{ color: '#d14467',marginBottom: '0'  }}>Email</h3>
                                         </div>
                                         <Input className="col-9 text-secondary" onChange={handleChange} name='email' readOnly={(editMode) ? false : true} disableUnderline={(editMode) ? false : true} defaultValue={userData.email} />
 
@@ -245,14 +247,14 @@ function Profile(props) {
                                     <hr />
                                     <div className="row1">
                                         <div className="col-3">
-                                            <h3 style={{ marginBottom: '0' }} style={{ color: '#944688' }}>Mobile</h3>
+                                            <h3 style={{ color: '#944688',marginBottom: '0'  }}>Mobile</h3>
                                         </div><Input className="col-9 text-secondary" name='mobile' onChange={handleChange} readOnly={(editMode) ? false : true} disableUnderline={(editMode) ? false : true} defaultValue={userData.mobile} />
 
                                     </div>
                                     <hr />
                                     <div className="row1">
                                         <div className="col-3">
-                                            <h3 style={{ marginBottom: '0' }} style={{ color: '#58418b' }}>Password</h3>
+                                            <h3 style={{ color: '#58418b',marginBottom: '0'  }}>Password</h3>
                                         </div>
                                         <Input className="col-9 text-secondary" onChange={handleChange} name='password' id='password' readOnly={(editMode) ? false : true} disableUnderline={(editMode) ? false : true} placeholder='***********' />
 
@@ -360,27 +362,29 @@ function Profile(props) {
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        userId: state.authReducer.userId,
-        token: state.authReducer.token,
-        firstName: state.authReducer.firstName,
-        lastName: state.authReducer.lastName,
-        email: state.authReducer.email,
-        mobile: state.authReducer.mobile,
-        isStudent: state.authReducer.is_student,
-        profileImg: state.authReducer.profileImg,
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         userId: state.authReducer.userId,
+//         token: state.authReducer.token,
+//         firstName: state.authReducer.firstName,
+//         lastName: state.authReducer.lastName,
+//         email: state.authReducer.email,
+//         mobile: state.authReducer.mobile,
+//         isStudent: state.authReducer.is_student,
+//         profileImg: state.authReducer.profileImg,
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        logout: () => dispatch(logout()),
-        updateUserData: (userData, userId, token) => dispatch(updateUserData(userData, userId, token))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         logout: () => dispatch(logout()),
+//         updateUserData: (userData, userId, token) => dispatch(updateUserData(userData, userId, token))
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Profile));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Profile));
+
+export default Profile;

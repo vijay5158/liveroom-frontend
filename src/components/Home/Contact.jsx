@@ -86,7 +86,7 @@ function Contact() {
                             placeholder="Enter Your email" />
                         <textarea className="form-input" name="concern" id="concern" onChange={handleChange} cols="30" rows="10"
                             placeholder="Ellaborate your concern" />
-                        <button type="reset" className="btn" onClick={handleSubmit}>Submit</button>
+                        <button type="reset" className="btn bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)]" onClick={handleSubmit}>Submit</button>
                     </form>
                 </div>
 

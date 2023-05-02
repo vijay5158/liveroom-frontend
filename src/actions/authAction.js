@@ -1,4 +1,7 @@
 import * as actionTypes from "./actions";
+import Cookies from "universal-cookie";
+
+const cookies=new Cookies();
 
 import axios from "axios";
 export const authStart = () => {
@@ -25,11 +28,10 @@ export const authFail = error => {
 
 
 export const logout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("userdata");
+
   localStorage.removeItem("classConnections");
-  // localStorage.removeItem("classes");
-  // axios.defaults.headers['Authorization'] = null;
+  cookies.remove('token');
+  axios.defaults.headers['Authorization'] = null;
   return {
     type: actionTypes.AUTH_LOGOUT
   };
@@ -47,29 +49,31 @@ export const authLogin = (email, password) => {
   return dispatch => {
     dispatch(authStart());
 
-    axios.post('http://localhost:8000/rest-auth/login/', {
+    axios.post('http://localhost:8000/api/login/', {
         email: email,
         password: password,
       }).then((res) => {
-        const userData = {
-          first_name: res.data.user_data.first_name,
-          last_name: res.data.user_data.last_name,
-          mobile: res.data.user_data.mobile,
-          profile_img: res.data.user_data.profile_img,
-          token: res.data.key,
-          email,
-          userId: res.data.user,
-          is_student: res.data.user_data.is_student,
-          is_teacher: res.data.user_data.is_teacher,
-          expirationDate: new Date(new Date().getTime() + 36000 * 1000)
-        };
+        const data = res.data?.user;
+        const tokens = res.data?.tokens;
         const user = {
-          expirationDate: new Date(new Date().getTime() + 36000 * 1000)
-        }
+          profile_img: data?.profile_img,
+          first_name: data?.first_name,
+          last_name: data?.last_name,
+          mobile: data?.mobile,
+          email: data?.email,
+          expirationDate: new Date(new Date().getTime() + 36000 * 1000),
+          is_student: data?.is_student,
+          is_teacher: data?.is_teacher,
+          token: tokens?.access,
+          refresh_token: tokens?.refresh,
+          userId: data?.id
+        };
 
-        localStorage.setItem("user", JSON.stringify(userData));
+        // localStorage.setItem("user", JSON.stringify(userData));
 
-        dispatch(authSuccess(userData));
+        cookies.set('token', tokens?.access);
+        cookies.set('refresh_token', tokens?.refresh);
+        dispatch(authSuccess(user));
         dispatch(checkAuthTimeout(36000));
 
 
@@ -87,25 +91,65 @@ export const updateUserDataSuccess = userData => {
   };
 }
 
+
+export const getUserData = (token) => {
+  return dispatch => {
+    axios.defaults.headers = {
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    };
+
+    axios.get(`http://localhost:8000/api/list/user/`)
+      .then((res) => {
+        const data = res.data;
+        const userData = {
+          profileImg: data?.profile_img,
+          firstName: data?.first_name,
+          lastName: data?.last_name,
+          mobile: data?.mobile,
+          email: data?.email,
+          expirationDate: new Date(new Date().getTime() + 36000 * 1000),
+          is_student: data?.is_student,
+          is_teacher: data?.is_teacher,
+          userId: data?.id,
+          error: null,
+          loading: false,
+        };
+        dispatch(updateUserDataSuccess(userData));
+
+        dispatch(checkAuthTimeout(36000));
+
+
+      })
+      .catch((error) => {
+        alert(error);
+        dispatch(logout());
+      })
+  }
+}
+
+
 export const updateUserData = (userData, userId, token) => {
   return dispatch => {
     axios.defaults.headers = {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      Authorization: `Token ${token}`
+      Authorization: `Bearer ${token}`
     };
 
-    axios.patch(`http://localhost:8000/list/user/${userId}/`, userData)
+    axios.patch(`http://localhost:8000/api/list/user/${userId}/`, userData)
       .then((res) => {
-        console.log(res.data)
         const userData = {
-          first_name: res.data.first_name,
-          last_name: res.data.last_name,
+          firstName: res.data.first_name,
+          lastName: res.data.last_name,
           mobile: res.data.mobile,
-          profile_img: res.data.profile_img,
-
+          profileImg: res.data.profile_img,
+          error: null,
+          loading: false,
           email: res.data.email,
         };
+       
         dispatch(updateUserDataSuccess(userData));
 
 
@@ -120,7 +164,7 @@ export const updateUserData = (userData, userId, token) => {
 export const authSignup = (firstName, lastName, email, mobile, password, isStudent) => {
   return dispatch => {
     dispatch(authStart());
-    axios.post('http://localhost:8000/register/', {
+    axios.post('http://localhost:8000/api/register/', {
         first_name: firstName,
         last_name: lastName,
         email: email,
@@ -129,24 +173,23 @@ export const authSignup = (firstName, lastName, email, mobile, password, isStude
         is_student: isStudent,
         is_teacher: !isStudent,
       }).then((res) => {
-        console.log(res.data)
-
+        const data = res.data?.user;
+        const tokens = res.data?.tokens;
         const userData = {
-          profile_img: res.data.profile_img,
-          first_name: res.data.first_name,
-          last_name: res.data.last_name,
-          mobile: res.data.mobile,
-          email: res.data.email,
+          profile_img: data?.profile_img,
+          first_name: data?.first_name,
+          last_name: data?.last_name,
+          mobile: data?.mobile,
+          email: data?.email,
           expirationDate: new Date(new Date().getTime() + 36000 * 1000),
-          is_student: isStudent,
-          is_teacher: !isStudent,
-          token: res.data.token,
-          userId: res.data.id
-        };
-        const user = {
-          expirationDate: new Date(new Date().getTime() + 36000 * 1000)
-        }
-        localStorage.setItem('user', JSON.stringify(userData))
+          is_student: data?.is_student,
+          is_teacher: data?.is_teacher,
+          token: tokens?.access,
+          refresh_token: tokens?.refresh,
+          userId: data?.id
+          };
+        cookies.set('token', tokens?.access);
+        cookies.set('refresh_token', tokens?.refresh);
         dispatch(authSuccess(userData));
         dispatch(checkAuthTimeout(36000));
       })
@@ -158,21 +201,22 @@ export const authSignup = (firstName, lastName, email, mobile, password, isStude
 
 export const authCheckState = () => {
   return dispatch => {
-    const user = JSON.parse(localStorage.getItem("user"))
-    if (user === undefined || user === null) {
+    const token = cookies.get('token');
+    if (!token) {
       dispatch(logout());
     } else {
-      const expirationDate = new Date(user.expirationDate);
-      if (expirationDate <= new Date()) {
-        dispatch(logout());
-      } else {
-        dispatch(authSuccess(user));
-        dispatch(
-          checkAuthTimeout(
-            (expirationDate.getTime() - new Date().getTime()) / 1000
-          )
-        );
-      }
+      dispatch(getUserData(token));
+      // const expirationDate = new Date(user.expirationDate);
+      // if (expirationDate <= new Date()) {
+      //   dispatch(logout());
+      // } else {
+      //   dispatch(authSuccess(user));
+      //   dispatch(
+      //     checkAuthTimeout(
+      //       (expirationDate.getTime() - new Date().getTime()) / 1000
+      //     )
+      //   );
+      // }
     }
   };
 };

@@ -2,20 +2,24 @@ import { Input } from '@material-ui/core';
 import Button from "@material-ui/core/Button";
 import SendIcon from '@material-ui/icons/Send';
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { useParams, withRouter } from 'react-router-dom';
+import { connect, useDispatch } from "react-redux";
+import { useParams } from 'react-router-dom';
 import { createAnmnt, getAnmnt } from '../../actions/classAction';
 import LoginDialog from "../Login/LoginDialog";
 import './style.css';
+import { useAuth } from '../../reducers/authReducer';
+import { useAnnouncements, useClasses } from '../../reducers/classReducer';
 
 function Announcements(props) {
-
+    const authData = useAuth();
     const { slug } = useParams();
-
+    const classes = useClasses();
+    const dispatch = useDispatch();
+    const announcements = useAnnouncements();
     useEffect(() => {
         window.scrollTo(0, 0)
     }, [])
-    const Class = props.classes.filter((cls) => {
+    const Class = classes.filter((cls) => {
 
         return cls.slug === slug
 
@@ -36,10 +40,10 @@ function Announcements(props) {
 
     }
     const handleSubmit = (e) => {
-        props.createAnmnt(props.token, anmnt);
+        dispatch(createAnmnt(authData?.token, anmnt));
     }
 
-    if (props.token) {
+    if (authData?.token) {
         return (
             <div style={{ marginTop: '20px' }}>
                 <div className="bulletins">
@@ -53,7 +57,7 @@ function Announcements(props) {
 
 
                 </div>
-                {(!props.is_student) ? <div className="announcement" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {(!authData.is_student) ? <div className="announcement" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
                     <form action="" className="announcement-form" style={{ display: 'flex', flexDirection: 'row', width: '90%', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="input-form">
@@ -73,7 +77,7 @@ function Announcements(props) {
                 <div className="bulletins">
                     <div className="wrap">
 
-                        {props.announcements.map((anmnt) => <div className="announcement" style={{ marginTop: "20px", width: '90%', display: 'flex', margin: 'auto', alignItems: 'center', justifyContent: 'center', backgroundColor: 'gray' }}>
+                        {announcements.map((anmnt) => <div className="announcement" style={{ marginTop: "20px", width: '90%', display: 'flex', margin: 'auto', alignItems: 'center', justifyContent: 'center', backgroundColor: 'gray' }}>
                             <p> {anmnt.announcement}</p></div>
                         )}
 
@@ -96,28 +100,24 @@ function Announcements(props) {
     };
 }
 
-const mapStateToProps = state => {
-    return {
-        authenticated: state.authReducer.token !== null,
-        token: state.authReducer.token,
-        classes: state.classReducer.classes,
-        is_student: state.authReducer.is_student,
-        email: state.authReducer.email,
-        announcements: state.classReducer.announcements
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         authenticated: state.authReducer.token !== null,
+//         token: state.authReducer.token,
+//         classes: state.classReducer.classes,
+//         is_student: state.authReducer.is_student,
+//         email: state.authReducer.email,
+//         announcements: state.classReducer.announcements
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        createAnmnt: (token, Anmnt) => dispatch(createAnmnt(token, Anmnt)),
-        getAnmnt: (token, slug) => dispatch(getAnmnt(token, slug))
-        // logout: () => dispatch(logout()),
-        // handleLogout: ()=> dispatch(handleLogout())
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         createAnmnt: (token, Anmnt) => dispatch(createAnmnt(token, Anmnt)),
+//         getAnmnt: (token, slug) => dispatch(getAnmnt(token, slug))
+//         // logout: () => dispatch(logout()),
+//         // handleLogout: ()=> dispatch(handleLogout())
+//     };
+// };
 
-export default withRouter(
-    connect(
-        mapStateToProps,
-        mapDispatchToProps
-    )(Announcements))
+export default Announcements;

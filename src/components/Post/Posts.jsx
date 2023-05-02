@@ -5,11 +5,13 @@ import CloseIcon from '@material-ui/icons/Close';
 import SendIcon from '@material-ui/icons/Send';
 import FormData from 'form-data';
 import React, { useState } from 'react';
-import { connect } from "react-redux";
-import { useHistory, withRouter } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 import { createPost, getComment, getPost } from "../../actions/postAction";
 import Post from "./Post";
 import './poststyle.css';
+import { usePosts } from '../../reducers/postReducer';
+import { useAuth } from '../../reducers/authReducer';
 
 
 
@@ -41,9 +43,11 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Posts = (props) => {
-
+    const allPosts = usePosts();
+    const authData = useAuth();
+    const dispatch = useDispatch();
     const [expand, setExpand] = useState(false);
-    const history = useHistory();
+    const navigate = useNavigate();
     const initialFormData = Object.freeze({
         text: '',
         classroom: props.classId
@@ -52,7 +56,7 @@ const Posts = (props) => {
     const data = {
         slug: props.slug
     }
-    const [posts, setPosts] = useState(props.posts);
+    const [posts, setPosts] = useState(allPosts);
     const slug = props.slug;
     const [postData, updatePostData] = useState(initialFormData);
     const [postImage, setPostImage] = useState(null);
@@ -77,7 +81,7 @@ const Posts = (props) => {
         post.append('file', postImage.file[0]);
         post.append('file_name', postImage.file_name);
 
-        props.createPost(props.token, post);
+        dispatch(createPost(authData?.token, post));
 
         setExpand(false)
     }
@@ -87,7 +91,7 @@ const Posts = (props) => {
     return (
         <>
             <Container maxWidth="md" component="main">
-                {(!props.is_student) ?
+                {(!authData?.is_student) ?
 
                     <div className="add-post">
 
@@ -120,27 +124,29 @@ const Posts = (props) => {
 }
 
 
-const mapStateToProps = state => {
-    return {
-        is_student: state.authReducer.is_student,
-        loading: state.postReducer.loading,
-        token: state.authReducer.token,
-        posts: state.postReducer.posts,
+// const mapStateToProps = state => {
+//     return {
+//         is_student: state.authReducer.is_student,
+//         loading: state.postReducer.loading,
+//         token: state.authReducer.token,
+//         posts: state.postReducer.posts,
 
 
-    };
-};
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        getPost: (token, slug) => dispatch(getPost(token, slug)),
-        createPost: (token, post) => dispatch(createPost(token, post)),
-        getComment: (token, slug) => dispatch(getComment(token, slug)),
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         getPost: (token, slug) => dispatch(getPost(token, slug)),
+//         createPost: (token, post) => dispatch(createPost(token, post)),
+//         getComment: (token, slug) => dispatch(getComment(token, slug)),
 
-    };
-};
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Posts));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Posts));
+
+export default Posts;

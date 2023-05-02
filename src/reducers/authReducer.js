@@ -1,4 +1,9 @@
+import { useSelector } from "react-redux";
 import * as actionTypes from "../actions/actions";
+import Cookies from "universal-cookie";
+
+const cookies=new Cookies();
+const token= cookies.get('token')
 
 const updateObject = (oldObject, updatedProperties) => {
   return {
@@ -6,12 +11,14 @@ const updateObject = (oldObject, updatedProperties) => {
     ...updatedProperties
   };
 };
+
 const initialState = {
   firstName:null,
   lastName:null,
   profileImg:null,
   mobile:null,
-  token: null,
+  token: token,
+  refresh_token:null,
   email: null,
   name: null,
   is_student: null,
@@ -22,15 +29,8 @@ const initialState = {
 };
 
 const updateUserData = (state, action) =>{
-  return updateObject(state, {
-    firstName: action.userData.first_name,
-    lastName: action.userData.last_name,
-    profileImg: action.userData.profile_img,
-    mobile: action.userData.mobile,
-    email: action.userData.email,
-    error: null,
-    loading: false
-})
+  console.log(action.userData,'ffgg');
+  return updateObject(state,action.userData)
 }
 
 
@@ -41,6 +41,7 @@ const authSuccess = (state, action) => {
     profileImg: action.userData.profile_img,
     mobile: action.userData.mobile,
     token: action.userData.token,
+    refresh_token: action.userData.refresh_token,
     email: action.userData.email,
     is_student: action.userData.is_student,
     is_teacher: action.userData.is_teacher,
@@ -68,6 +69,8 @@ const authLogout = (state, action) => {
     token: null
   });
 };
+
+export const useAuth = () => useSelector(root => root?.authReducer);
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {

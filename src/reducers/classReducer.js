@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import * as actionTypes from "../actions/actions";
 
 const updateObject = (oldObject, updatedProperties) => {
@@ -145,6 +146,13 @@ const deleteCLSSuccess = (state, action) => {
         loading: false
     });
 };
+
+
+export const useClasses = () => useSelector(root => root?.classReducer?.classes);
+export const useCurrentClass = () => useSelector(root => root?.classReducer?.currentClass);
+export const useAnnouncements = () => useSelector(root => root?.classReducer?.announcements);
+export const useClassError = () => useSelector(root => root?.classReducer?.error);
+export const useClassloading = () => useSelector(root => root?.classReducer?.loading);
 
 
 const classReducer = (state = initialState, action) => {

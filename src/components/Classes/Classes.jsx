@@ -4,28 +4,32 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import AddCircleOutlineRoundedIcon from '@material-ui/icons/AddCircleOutlineRounded';
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { getCLS } from "../../actions/classAction";
 import Loader from "../Loader/Loader";
 import LoginDialog from "../Login/LoginDialog";
 import Class from './Class/Class';
 import CreateClass from "./Class/Create";
 import JoinClass from "./Class/JoinClass";
+import { useAuth } from '../../reducers/authReducer';
+import { useClasses, useClassloading } from '../../reducers/classReducer';
 
 
 
 const Classes = (props) => {
-    const token = props.token;
-    const is_student = props.is_student;
-    const classes = props.classes;
+    const authData = useAuth();
+    const token = authData?.token;
+    const is_student = authData?.is_student;
+    const classes = useClasses();
+    const dispatch = useDispatch();
+    const loading = useClassloading();
     const [anchorEl, setAnchorEl] = useState(null)
 
     useEffect(() => {
         window.scrollTo(0, 0)
         if (token) {
-            if (props.classes.length === 0) {
-                props.getCLS(token)
+            if (classes?.length === 0) {
+                dispatch(getCLS(token));
             }
         }
     }, []);
@@ -36,7 +40,7 @@ const Classes = (props) => {
     const handleClose = () => {
         setAnchorEl(null);
     };
-    if (props.loading) { return (<Loader />) }
+    if (loading) { return (<Loader />) }
     else {
         return (
             <>
@@ -46,7 +50,7 @@ const Classes = (props) => {
                         flexDirection: 'row',
                         alignItems: 'flex-start'
                     }} >
-                        {(props.classes.length === 0) ? <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', margin: 'auto', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}><h1>No Classes to show.</h1><hr />{(is_student) ? <p>Join a Class.</p> : <p>Create a Class.</p>}  </div> :
+                        {(classes.length === 0) ? <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', margin: 'auto', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}><h1>No Classes to show.</h1><hr />{(is_student) ? <p>Join a Class.</p> : <p>Create a Class.</p>}  </div> :
                             <Box display="flex"
                                 flexWrap="wrap"
                                 p={1}
@@ -61,7 +65,7 @@ const Classes = (props) => {
                                 borderRadius='10px'
                             >
 
-                                {props.classes.map((cls, index) => <Class key={index} clsId={cls.id} slug={cls.slug} classname={cls.class_name} subject={cls.subject} standard={cls.standard} teacher={cls.teachers} />)}
+                                {classes.map((cls, index) => <Class key={index} clsId={cls.id} slug={cls.slug} classname={cls.class_name} subject={cls.subject} standard={cls.standard} teacher={cls.teachers} />)}
 
                             </Box>}
                         <Button style={{ position: 'fixed', right: '2%', marginTop: '1rem' }} aria-controls="simple-menu" aria-haspopup="true"
@@ -96,23 +100,25 @@ const Classes = (props) => {
 
 
 
-const mapStateToProps = state => {
-    return {
-        is_student: state.authReducer.is_student,
-        email: state.authReducer.email,
-        loading: state.classReducer.loading,
-        token: state.authReducer.token,
-        classes: state.classReducer.classes
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         is_student: state.authReducer.is_student,
+//         email: state.authReducer.email,
+//         loading: state.classReducer.loading,
+//         token: state.authReducer.token,
+//         classes: state.classReducer.classes
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        getCLS: (token) => dispatch(getCLS(token))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         getCLS: (token) => dispatch(getCLS(token))
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Classes));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Classes));
+
+export default Classes;

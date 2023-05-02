@@ -26,12 +26,12 @@ const createPostFail = error => {
 export const createPost = (token, post) => {
     return dispatch => {
         dispatch(createPostStart());
-        axios.post('http://localhost:8000/class/post/', post, {
+        axios.post('http://localhost:8000/api/class/post/', post, {
                 headers: {
                     'Content-Type': `multipart/form-data; boundary=${post._boundary}`,
                     'accept': 'application/json',
                     'Accept-Language': 'en-US,en;q=0.8',
-                    Authorization: `Token ${token}`
+                    Authorization: `Bearer ${token}`
                 }
             })
             .then(res => {
@@ -77,9 +77,9 @@ export const getPost = (token, slug) => {
 
         dispatch(getPostListStart());
         axios.defaults.headers = {
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        const url = `http://localhost:8000/class/post/?slug=${slug}`
+        const url = `http://localhost:8000/api/class/post/?slug=${slug}`
         axios
             .get(url)
             .then(res => {
@@ -107,9 +107,9 @@ export const getComment = (token, slug) => {
 
 
         axios.defaults.headers = {
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        const url = `http://localhost:8000/class/comment/?slug=${slug}`
+        const url = `http://localhost:8000/api/class/comment/?slug=${slug}`
         axios
             .get(url)
             .then(res => {
@@ -133,9 +133,9 @@ export const createCommentSuccess = (comment) => {
 
 export const createComment = (token, comment) => {
     return dispatch => {
-        axios.post('http://localhost:8000/class/comment/', comment, {
+        axios.post('http://localhost:8000/api/class/comment/', comment, {
                 headers: {
-                    Authorization: `Token ${token}`
+                    Authorization: `Bearer ${token}`
                 }
             })
             .then(res => {

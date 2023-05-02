@@ -6,16 +6,20 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { useHistory, withRouter } from "react-router-dom";
+import { connect, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { getCLS, joinCLS } from "../../../actions/classAction";
+import { useAuth } from "../../../reducers/authReducer";
+import { useClasses } from "../../../reducers/classReducer";
 
 function JoinClass(props) {
-
+    const authData = useAuth();
+    const classes = useClasses();
+    const dispatch = useDispatch();
     const [open, setOpen] = React.useState(false);
     const initialData = Object.freeze({
         slug: '',
-        student_id: props.userId,
+        student_id: authData?.userId,
     });
 
     const [data, setData] = useState(initialData);
@@ -36,11 +40,11 @@ function JoinClass(props) {
 
     };
     function handleJoin() {
-        const duplicateClass = props.classes.filter((cls) => {
+        const duplicateClass = classes.filter((cls) => {
             return cls.slug === data.slug
         })
         if (duplicateClass.length === 0) {
-            props.joinClass(props.token, data);
+            dispatch(joinCLS(authData?.token, data));
         }
         else {
             alert('You are already joined.')
@@ -86,22 +90,24 @@ function JoinClass(props) {
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        userId: state.authReducer.userId,
-        token: state.authReducer.token,
-        classes: state.classReducer.classes
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         userId: state.authReducer.userId,
+//         token: state.authReducer.token,
+//         classes: state.classReducer.classes
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        joinClass: (token, data) => dispatch(joinCLS(token, data)),
-        getCLS: (token) => dispatch(getCLS(token))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         joinClass: (token, data) => dispatch(joinCLS(token, data)),
+//         getCLS: (token) => dispatch(getCLS(token))
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(JoinClass));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(JoinClass));
+
+export default JoinClass;

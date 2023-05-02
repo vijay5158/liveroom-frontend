@@ -8,13 +8,14 @@ import {
     AddCommentRounded
 } from "@material-ui/icons";
 import React, { useState } from 'react';
-import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { createComment, getComment } from "../../actions/postAction";
 import postbg from '../../images/postbg.jpg';
 import Comment from "./Comment";
 import PostData from "./PostData";
 import './poststyle.css';
+import { useComments } from "../../reducers/postReducer";
+import { useAuth } from "../../reducers/authReducer";
 
 
 const useStyles1 = makeStyles((theme) => ({
@@ -73,6 +74,9 @@ const useStyles = makeStyles((theme) => ({
 
 
 function Post(props) {
+    const comments = useComments();
+    const authData = useAuth();
+    const dispatch = useDispatch();
     const [expand, setExpand] = useState(false);
     const postData = Object.freeze({
         text: '',
@@ -82,7 +86,7 @@ function Post(props) {
     const [post, setPost] = useState(postData);
     const classes = useStyles();
     const classes1 = useStyles1();
-    let postComments = props.comments.filter((cmnt) => cmnt.post === props.post_id);
+    let postComments = comments.filter((cmnt) => cmnt.post === props.post_id);
     function showComments() {
         setExpand(true);
     }
@@ -106,7 +110,7 @@ function Post(props) {
 
             setPost(postData);
             document.getElementById(`text${props.post_id}`).value = '';
-            props.createComment(props.token, post);
+            dispatch(createComment(authData?.token, post));
         }
     }
 
@@ -170,7 +174,7 @@ function Post(props) {
                             {(expand) ? <div style={{ marginTop: '2rem' }}>
 
                                 <div className="show-comments">
-                                    {props.comments.filter((cmnt) => cmnt.post === props.post_id).map((comment, index) => <Comment key={index} userImg={comment.User.profile_img} name={comment.User.first_name + ' ' + comment.User.last_name} text={comment.text} time={comment.time} date={comment.date} />)}
+                                    {comments.filter((cmnt) => cmnt.post === props.post_id).map((comment, index) => <Comment key={index} userImg={comment.User.profile_img} name={comment.User.first_name + ' ' + comment.User.last_name} text={comment.text} time={comment.time} date={comment.date} />)}
                                 </div> </div> : null}
                         </Grid>
                     </Grid>
@@ -180,25 +184,28 @@ function Post(props) {
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        loading: state.postReducer.loading,
-        token: state.authReducer.token,
-        comments: state.postReducer.comments,
+// const mapStateToProps = state => {
+//     return {
+//         loading: state.postReducer.loading,
+//         token: state.authReducer.token,
+//         comments: state.postReducer.comments,
 
 
-    };
-};
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
+// const mapDispatchToProps = dispatch => {
+//     return {
 
-        createComment: (token, comment) => dispatch(createComment(token, comment)),
-        getComment: (token, slug) => dispatch(getComment(token, slug))
-    };
-};
+//         createComment: (token, comment) => dispatch(createComment(token, comment)),
+//         getComment: (token, slug) => dispatch(getComment(token, slug))
+//     };
+// };
 
-export default withRouter(connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Post));
+// export default withRouter(connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Post));
+
+
+export default Post;

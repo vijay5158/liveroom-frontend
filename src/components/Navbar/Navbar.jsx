@@ -6,17 +6,21 @@ import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
-import { Link, withRouter } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { Link } from 'react-router-dom';
 import { logout } from "../../actions/authAction";
 import { handleLogout } from "../../actions/classAction";
 import logo from "../../images/logo.png";
 import Login from '../Login/LoginDialog';
 import './style.css';
+import { useAuth } from '../../reducers/authReducer';
 
 
 
 const Navbar = (props) => {
+    const authData = useAuth();
+    const dispatch = useDispatch();
+    const token = authData?.token;
     const scripts = () => {
         const burger = document.querySelector('.burger')
         const navbar = document.querySelector('.navbar')
@@ -66,19 +70,18 @@ const Navbar = (props) => {
     const handleCloseLogout = (event) => {
         event.preventDefault();
         setAnchorEl(null);
-        props.handleLogout();
-        props.logout();
+        dispatch(handleLogout())
+        dispatch(logout())
 
     }
     const handleClose = () => {
         setAnchorEl(null);
     };
-    let token = props.token;
     return (
         <>
-            <nav className="navbar nav background1 h-nav-resp">
-                <ul className="nav-list v-class-resp">
-                    <div className="logo"><img src={logo} alt="logo" /></div>
+            <nav className="navbar nav background1 h-nav-resp px-4">
+                <ul className="nav-list w-[100%] v-class-resp">
+                    <div className="logo w-[15%]"><img className='w-[80%]' src={logo} alt="logo" /></div>
                     <li><Link to="/">Home</Link></li>
                     <li><Link to="/classes/">Classes</Link></li>
 
@@ -119,22 +122,24 @@ const Navbar = (props) => {
         </>
     );
 }
-const mapStateToProps = state => {
-    return {
-        authenticated: state.authReducer.token !== null,
-        token: state.authReducer.token
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         authenticated: state.authReducer.token !== null,
+//         token: state.authReducer.token
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        logout: () => dispatch(logout()),
-        handleLogout: () => dispatch(handleLogout())
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         logout: () => dispatch(logout()),
+//         handleLogout: () => dispatch(handleLogout())
+//     };
+// };
 
-export default withRouter(
-    connect(
-        mapStateToProps,
-        mapDispatchToProps
-    )(Navbar))
+// export default withRouter(
+//     connect(
+//         mapStateToProps,
+//         mapDispatchToProps
+//     )(Navbar))
+
+export default Navbar;

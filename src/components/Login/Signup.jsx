@@ -1,8 +1,8 @@
 import { FormControl, FormHelperText, InputLabel, NativeSelect } from "@material-ui/core";
 import React, { useEffect, useState } from 'react';
-import { connect } from "react-redux";
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authLogin, authSignup } from "../../actions/authAction";
+import { useDispatch } from "react-redux";
 const handleSlideSignup = () => {
     const sign_in_btn = document.querySelector("#sign-in-btn");
     const sign_up_btn = document.querySelector("#sign-up-btn");
@@ -18,12 +18,14 @@ const handleSlideSignup = () => {
 }
 
 function Signup(props) {
+    const dispatch = useDispatch()
+
     const [state, setState] = React.useState({
         userType: '',
     });
 
 
-    const history = useHistory();
+    const navigate = useNavigate();
     const initialFormDataSignup = Object.freeze({
         firstName: '',
         lastName: '',
@@ -54,9 +56,9 @@ function Signup(props) {
         if (userType === "student") {
             isStudent = true
         }
-        props.signup(firstName, lastName, email, mobile, password, isStudent);
+        dispatch(authSignup(firstName, lastName, email, mobile, password, isStudent));
         setFormDataSignup(lastFormDataSignup);
-        history.push('/');
+        navigate('/');
         handleClose();
     }
     const signupContainer = document.querySelector('#signupContainer')
@@ -82,11 +84,11 @@ function Signup(props) {
     const handleSubmitLogin = (event) => {
         event.preventDefault()
         const { email, password } = formDataLogin;
-        props.login(email, password)
+        dispatch(authLogin(email, password));
 
         setFormDataLogin(lastFormDataLogin);
         handleClose();
-        history.push('/');
+        navigate('/');
     }
 
     const loginContainer = document.querySelector('#loginContainer')
@@ -94,7 +96,7 @@ function Signup(props) {
 
     return (
         <>
-            <div className="container" id="signupContainer">
+            <div className="container max-w-[100%]" id="signupContainer">
 
                 <div className="forms-container">
                     <div className="signin-signup">
@@ -137,7 +139,7 @@ function Signup(props) {
                                 <FormHelperText>please select accordingly.</FormHelperText>
                             </FormControl>
 
-                            <input type="submit" className="btn" onClick={handleSubmit} value="Sign up" />
+                            <input type="submit" className="btn bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)]" onClick={handleSubmit} value="Sign up" />
                             <p className="social-text">Or Sign up with social platforms</p>
                             <div className="social-media">
                                 <a href="#" className="social-icon">
@@ -164,7 +166,7 @@ function Signup(props) {
                                 <i className="fas fa-lock"></i>
                                 <input type="password" onChange={handleChangeLogin} name="password" placeholder="Password" />
                             </div>
-                            <input type="submit" value="Login" onClick={handleSubmitLogin} className="btn solid" />
+                            <input type="submit" value="Login" onClick={handleSubmitLogin} className="btn bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)] solid" />
                             <p className="social-text">Or Sign in with social platforms</p>
                             <div className="social-media">
                                 <a href="#" className="social-icon">
@@ -219,23 +221,24 @@ function Signup(props) {
 }
 
 
-const mapStateToProps = state => {
-    return {
-        loading: state.authReducer.loading,
-        error: state.authReducer.error,
-        token: state.authReducer.token
-    };
-};
+// const mapStateToProps = state => {
+//     return {
+//         loading: state.authReducer.loading,
+//         error: state.authReducer.error,
+//         token: state.authReducer.token
+//     };
+// };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        signup: (firstName, lastName, email, mobile, password, isStudent) => dispatch(authSignup(firstName, lastName, email, mobile, password, isStudent)),
-        login: (email, password) => dispatch(authLogin(email, password))
-    };
-};
+// const mapDispatchToProps = dispatch => {
+//     return {
+//         signup: (firstName, lastName, email, mobile, password, isStudent) => dispatch(authSignup(firstName, lastName, email, mobile, password, isStudent)),
+//         login: (email, password) => dispatch(authLogin(email, password))
+//     };
+// };
 
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(Signup);
+// export default connect(
+//     mapStateToProps,
+//     mapDispatchToProps
+// )(Signup);
 
+export default Signup;

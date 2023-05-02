@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import * as actionTypes from "../actions/actions";
 
 
@@ -88,6 +89,12 @@ const createCommentSuccess = (state, action) => {
     });
 };
 
+
+export const usePosts = () => useSelector(root => root?.postReducer?.posts);
+export const useclassSlug = () => useSelector(root => root?.postReducer?.classSlug);
+export const useComments = () => useSelector(root => root?.postReducer?.comments);
+export const usePostError = () => useSelector(root => root?.postReducer?.error);
+export const usePostloading = () => useSelector(root => root?.postReducer?.loading);
 
 
 const postReducer = (state = initialState, action) => {

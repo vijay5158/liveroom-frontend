@@ -30,13 +30,12 @@ export const getCLS = token => {
         dispatch(getCLSListStart());
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
         axios
-            .get("http://localhost:8000/class/classes/")
+            .get("http://localhost:8000/api/class/classes/")
             .then(res => {
                 const classes = res.data;
-                localStorage.setItem('classes', JSON.stringify(classes));
                 dispatch(getCLSListSuccess(classes));
             })
             .catch(err => {
@@ -72,13 +71,12 @@ export const getAnmnt = (token,slug) => {
         dispatch(getAnmntListStart());
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
         axios
-            .get(`http://localhost:8000/class/announcement/${slug}`)
+            .get(`http://localhost:8000/api/class/announcement/${slug}`)
             .then(res => {
                 const announcements = res.data;
-                localStorage.setItem('announcements', JSON.stringify(announcements));
                 dispatch(getAnmntListSuccess(announcements));
             })
             .catch(err => {
@@ -118,9 +116,9 @@ export const createAnmnt = (token, Anmnt) => {
         dispatch(createAnmntStart());
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        axios.post(`http://localhost:8000/class/announcement/`, Anmnt)
+        axios.post(`http://localhost:8000/api/class/announcement/`, Anmnt)
             .then(res => {
                 console.log(res.data)
 
@@ -158,9 +156,9 @@ export const createCLS = (token, cls) => {
         dispatch(createCLSStart());
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        axios.post(`http://localhost:8000/class/classes/`, cls)
+        axios.post(`http://localhost:8000/api/class/classes/`, cls)
             .then(res => {
                 console.log(res.data)
                 
@@ -201,9 +199,9 @@ export const joinCLS = (token, data) => {
         dispatch(joinCLSStart());
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        axios.patch(`http://localhost:8000/class/classes/${slug}/`,student)
+        axios.patch(`http://localhost:8000/api/class/classes/${slug}/`,student)
             .then(res => {
                 // const Class = [res.data]
                 console.log(res.data);
@@ -229,9 +227,9 @@ export const deleteCLS = (token, data) => {
     return dispatch => {
         axios.defaults.headers = {
             "Content-Type": "application/json",
-            Authorization: `Token ${token}`
+            Authorization: `Bearer ${token}`
         };
-        axios.delete(`http://localhost:8000/class/classes/${slug}/`)
+        axios.delete(`http://localhost:8000/api/class/classes/${slug}/`)
             .then(res => {
                 console.log(res.data);
                 dispatch(deleteCLSSuccess(id))
