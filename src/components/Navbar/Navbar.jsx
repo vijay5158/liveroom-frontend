@@ -76,7 +76,7 @@ const Navbar = (props) => {
         <>
             <nav className="navbar nav background1 h-nav-resp sm:h-[70px] px-4">
                 <ul className="nav-list justify-end sm:justify-start w-[100%] gap-2 v-class-resp h-full">
-                  <div className="hidden sm:flex h-full">
+                  <div className="hidden sm:contents h-full">
                     <div className="logo h-full">
                         <img src={logo} alt="logo" className='h-[60px]' />
                         <h6 className='text-xl text-[#58418b] font-semibold'>PaathShaala</h6>

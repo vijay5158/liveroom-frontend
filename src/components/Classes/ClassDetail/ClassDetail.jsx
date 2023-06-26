@@ -102,7 +102,7 @@ function ClassDetail(props) {
 
     useEffect(() => {
 
-        const path = `ws://api.paathshaala.me/ws/class/${slug}/`;
+        const path = `wss://api.paathshaala.me/ws/class/${slug}/`;
 
           webSocket.current = new WebSocket(path);
           webSocket.current.onopen = () => {
