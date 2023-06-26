@@ -7,11 +7,14 @@ import FormData from 'form-data';
 import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useNavigate } from 'react-router-dom';
-import { createPost, getComment, getPost } from "../../actions/postAction";
 import Post from "./Post";
 import './poststyle.css';
-import { usePosts } from '../../reducers/postReducer';
-import { useAuth } from '../../reducers/authReducer';
+import { useUser } from '../../redux/reducers/userReducer';
+import { useAccessToken } from '../../redux/reducers/authReducer';
+import { useRef } from 'react';
+import { getCurrentClass } from '../../redux/reducers/classReducer';
+import { createPost, usePosts } from '../../redux/reducers/postReducer';
+import { Spinner } from 'react-bootstrap';
 
 
 
@@ -43,21 +46,18 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Posts = (props) => {
-    const allPosts = usePosts();
-    const authData = useAuth();
+    const classData = getCurrentClass();
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
+    const accessToken = useAccessToken();
+    const posts = usePosts();
+    const postIds = Object.keys(posts);
+    const userData = useUser();
     const [expand, setExpand] = useState(false);
-    const navigate = useNavigate();
     const initialFormData = Object.freeze({
         text: '',
-        classroom: props.classId
-
+        classroom: classData?.id
     });
-    const data = {
-        slug: props.slug
-    }
-    const [posts, setPosts] = useState(allPosts);
-    const slug = props.slug;
     const [postData, updatePostData] = useState(initialFormData);
     const [postImage, setPostImage] = useState(null);
 
@@ -75,23 +75,26 @@ const Posts = (props) => {
         });
     };
     const handleSubmit = (event) => {
+        if (postData.text !=="" && postImage){
+            setLoading(true);
         let post = new FormData();
         post.append('text', postData.text);
         post.append('classroom', postData.classroom);
         post.append('file', postImage.file[0]);
         post.append('file_name', postImage.file_name);
 
-        dispatch(createPost(authData?.token, post));
+        dispatch(createPost(accessToken, post,setLoading));
 
         setExpand(false)
     }
+}
     const classes = useStyles();
     classes.cardContent = undefined;
     classes.card = undefined;
     return (
         <>
             <Container maxWidth="md" component="main">
-                {(!authData?.is_student) ?
+                {(!userData?.is_student) ?
 
                     <div className="add-post">
 
@@ -101,14 +104,15 @@ const Posts = (props) => {
                                 <Input placeholder={(expand) ? "Enter Text" : "Click to add post."} autoFocus={(expand)} onChange={handleChange} onClick={() => setExpand(true)} name="text" fullWidth={true} multiline={(expand) ? true : false} rows={2} />
                                 {(expand) ?
                                     <Button style={{ marginTop: '1rem' }}>
-                                        <Input type="file" multiple id="file"
+                                        <Input type="file" id="file"
                                             accept="application/msword, application/vnd.ms-excel, application/vnd.ms-powerpoint,text/plain, application/pdf, image/*"
                                             onChange={handleChangeFile} disableUnderline={true} name="file" /> </Button> : null}
                             </div>
                             {(expand) ?
                                 <div className="button-form">
-                                    <Button type="reset" onClick={handleSubmit} >
+                                    <Button type="reset" disabled={loading} onClick={handleSubmit} >
                                         <SendIcon style={{ color: '#f74754' }} />
+                                    {loading && <Spinner />}
                                     </Button>
                                     <Button onClick={() => setExpand(false)}>
                                         <CloseIcon style={{ color: '#f74754' }} />
@@ -117,7 +121,7 @@ const Posts = (props) => {
                                 : null}
                         </form>
                     </div> : null}
-                {posts.map((post, index) => <Post key={index} firstName={post.user.first_name} slug={slug} lastName={post.user.last_name} profileImg={post.user.profile_img} text={post.text} file_name={post.file_name} file={post.file} user={post.user} date={post.date} time={post.time} post_id={post.id} />)}
+                    {postIds.map((postId, index) => <Post key={index} slug={classData?.slug} postData={posts[postId]} />)}
             </Container>
         </>
     );

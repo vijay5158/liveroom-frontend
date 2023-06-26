@@ -9,13 +9,12 @@ import {
 } from "@material-ui/icons";
 import React, { useState } from 'react';
 import { useDispatch } from "react-redux";
-import { createComment, getComment } from "../../actions/postAction";
 import postbg from '../../images/postbg.jpg';
 import Comment from "./Comment";
 import PostData from "./PostData";
 import './poststyle.css';
-import { useComments } from "../../reducers/postReducer";
-import { useAuth } from "../../reducers/authReducer";
+import { useAccessToken } from "../../redux/reducers/authReducer";
+import { createComment } from "../../redux/reducers/postReducer";
 
 
 const useStyles1 = makeStyles((theme) => ({
@@ -55,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
     paper: {
         padding: theme.spacing(2),
         margin: 'auto',
-        maxWidth: '60vw',
+        // maxWidth: '60vw',
         boxShadow: 'box-shadow: 2px 10px 20px rgba(0,0,0, 0.4)',
         backgroundImage: `url(${postbg})`
     },
@@ -73,69 +72,45 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-function Post(props) {
-    const comments = useComments();
-    const authData = useAuth();
+function Post({postData}) {
+    const [newComment, setNewComment] = useState('');
+    const [showComment, setShowComment] = useState(false);
     const dispatch = useDispatch();
-    const [expand, setExpand] = useState(false);
-    const postData = Object.freeze({
-        text: '',
-        post: props.post_id
-    });
-
-    const [post, setPost] = useState(postData);
-    const classes = useStyles();
-    const classes1 = useStyles1();
-    let postComments = comments.filter((cmnt) => cmnt.post === props.post_id);
-    function showComments() {
-        setExpand(true);
-    }
-    function hideComments() {
-        setExpand(false);
-    }
-    function textChange(event) {
-        setPost({
-            ...post,
-            [event.target.name]: event.target.value.trim(),
-        });
-
-    }
-
-
-    async function createCmnt(e) {
-        if (post.text.length === 0) {
-            alert('please fill in some text.')
-        }
-        else {
-
-            setPost(postData);
-            document.getElementById(`text${props.post_id}`).value = '';
-            dispatch(createComment(authData?.token, post));
-        }
-    }
-
-    return (
+    const accessToken = useAccessToken();
+    const comments = postData?.comments;
+    const commentKeys = Object.keys(comments);
+    const classes = useStyles()
+    const handleCreateComment = () => {
+      if (newComment !== '') {
+        const newCommentData = {
+          text: newComment,
+          post: postData.id,
+        };
+        dispatch(createComment(accessToken, newCommentData, setNewComment));
+      }
+    };
+      return (
         <>
             <div className={classes.root}>
                 <Paper className={classes.paper}>
                     <Grid >
                         <Grid item>
                             <div style={{ display: 'flex' }}>
-                                <Avatar src={props.profileImg} alt='user' />
+                                <Avatar src={postData?.user?.profile_img} alt='user' />
                                 <Typography style={{ marginLeft: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} gutterBottom variant="subtitle1">
-                                    <span style={{ fontSize: '1rem' }}>{props.firstName + ' ' + props.lastName}</span>
-                                    <span style={{ fontSize: '0.7rem', color: 'gray' }}>{props.date + "  " + props.time.slice(0, 8)}</span>
+                                    <span style={{ fontSize: '1rem' }}>{postData?.user?.name}</span>
+                                    <span style={{ fontSize: '0.7rem', color: 'gray' }}>{new Date(postData.created_at).toLocaleString()}</span>
                                 </Typography>
 
                             </div>
                         </Grid>
                         <Grid item>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '1rem' }}>
-                                <Typography gutterBottom variant="subtitle1" style={{ marginLeft: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} >
-                                    <span style={{ fontSize: '0.8rem', marginBottom: '0.8rem', color: 'dimgray' }}>{props.text}</span>
+                                <Typography gutterBottom variant="subtitle1" style={{ marginLeft: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', width:'100%' }} >
+                                    <span style={{ fontSize: '0.8rem', marginBottom: '0.8rem', color: 'dimgray' }}>{postData?.text}</span>
                                     {/*<object data={props.file} width="300" height="200" type="">*/}
-                                    {(props.file) ?
-                                        <PostData fileName={props.file_name} file={props.file} />
+                                    {(postData.file) ?
+                                        <PostData fileName={postData.file_name} file={postData?.file} />
 
 
                                         : null}
@@ -144,37 +119,37 @@ function Post(props) {
                         </Grid>
                         <Grid item>
                             <div className="comment-div" style={{ margin: '1rem', display: 'flex', flexDirection: 'row' }}>
-                                <Input id={"text" + props.post_id} name="text" onChange={textChange} fullWidth={true} placeholder="post a comment" />
-                                <Button type='reset'>
-                                    <AddCommentRounded onClick={createCmnt} style={{ color: '#f74754' }} />
+                                <Input id={"text" + postData.id} name="text" onChange={(e)=>setNewComment(e.target.value.trim())} fullWidth={true} placeholder="post a comment" />
+                                <Button type='reset'  onClick={handleCreateComment}>
+                                    <AddCommentRounded style={{ color: '#f74754' }} />
                                 </Button>
                             </div>
                             <br />
-
+                            {commentKeys?.length > 0 &&
                             <div className="comment-count">
                                 <p>Comments</p>
-                                {(expand) ?
-                                    <Button onClick={hideComments} style={{
+                                {(showComment) ?
+                                    <Button onClick={()=> setShowComment(!showComment)} style={{
                                         boxShadow: '2px 10px 20px rgba(0,0,0, 0.2)',
                                         padding: '0.3rem',
                                         borderRadius: '0.3rem'
                                     }}><span style={{ fontSize: '0.8rem' }}
                                         className='projName'> Hide Comments</span></Button>
-                                    : <Button onClick={showComments} style={{
+                                    : <Button onClick={()=> setShowComment(!showComment)} style={{
                                         boxShadow: '2px 10px 20px rgba(0,0,0, 0.2)',
                                         padding: '0.3rem',
                                         borderRadius: '0.3rem'
                                     }}><span style={{ fontSize: '0.8rem' }}
                                         className='projName'> Show Comments</span></Button>
                                 }
-                            </div>
+                            </div>}
                             {/*<br/>*/}
-                            <p style={{ margin: '1rem', textAlign: 'start' }}>{postComments.length} comments</p>
+                            <p style={{ margin: '1rem', textAlign: 'start' }}>{commentKeys?.length} comments</p>
                             <hr />
-                            {(expand) ? <div style={{ marginTop: '2rem' }}>
+                            {(showComment) ? <div style={{ marginTop: '2rem' }}>
 
                                 <div className="show-comments">
-                                    {comments.filter((cmnt) => cmnt.post === props.post_id).map((comment, index) => <Comment key={index} userImg={comment.User.profile_img} name={comment.User.first_name + ' ' + comment.User.last_name} text={comment.text} time={comment.time} date={comment.date} />)}
+                                    {commentKeys.map((commentKey, index) => <Comment key={index} userImg={comments[commentKey].User.profile_img} name={comments[commentKey]?.User?.name} text={comments[commentKey]?.text} time={comments[commentKey]?.created_at && new Date(comments[commentKey]?.created_at).toLocaleString()} />)}
                                 </div> </div> : null}
                         </Grid>
                     </Grid>

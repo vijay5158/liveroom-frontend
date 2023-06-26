@@ -1,22 +1,22 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { logout } from '../../actions/authAction';
 import logo from "../../images/logo1.png";
 import Login from "../Login/LoginDialog";
 import '../Navbar/style.css';
 import About from "./About";
 import Contact from "./Contact";
-import { useAuth } from '../../reducers/authReducer';
+import { useAccessToken } from '../../redux/reducers/authReducer';
+import { useUser } from '../../redux/reducers/userReducer';
 
 function Home(props) {
-    const authData = useAuth();
+    const token = useAccessToken();
+    const userData = useUser();
     const dispatch = useDispatch();
     useEffect(() => {
         window.scrollTo(0, 0)
     }, []);
 
-    let token = authData?.token;
     return (
 
         <div>
@@ -37,7 +37,7 @@ function Home(props) {
                         </div>
                     </div> : <div className="firstHalf" style={{ alignItems: 'center' }}>
                         <p className="text-big1">Welcome back ! <span
-                            className="projName">{authData?.firstName + ' ' + authData?.lastName}</span></p>
+                            className="projName">{userData?.name}</span></p>
 
                         <div className="buttons">
                             <Link to='classes/'><button className="btn">Go to Classroom</button></Link>

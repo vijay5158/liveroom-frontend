@@ -35,7 +35,7 @@ function Contact() {
             concern: formDataContact.concern
         }
 
-        axios.post('http://localhost:8000/contact/', contact)
+        axios.post('http://paathshaala.me/contact/', contact)
             .then((res) => {
                 setFormDataContact(initialDataContact);
                 closeAlertError();
@@ -78,7 +78,7 @@ function Contact() {
             <section className="contact" id="contact">
                 <h1 className="text-center text-big">Contact Us</h1>
                 <div className="form">
-                    <form action="" style={{ width: '70vw' }}>
+                    <form action="" className='sm:w-[70vw] w-full'>
                         <input className="form-input" type="text" onChange={handleChange} name="name" id="name" placeholder="Enter Your name" />
                         <input className="form-input" type="text" onChange={handleChange} name="mobile" id="mobile"
                             placeholder="Enter Your Phone" />

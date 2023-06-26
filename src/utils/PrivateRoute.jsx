@@ -6,7 +6,6 @@ const PrivateRoute = ({ children }) => {
 
     const cookies = new Cookies();
     const token = cookies.get('token')
-    console.log(token);
 
     if (!token) {
         return <Navigate to="/" replace/>

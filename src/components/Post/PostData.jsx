@@ -18,6 +18,7 @@ import ZipIcon from '../../images/zip.jpg';
 const useStyles = makeStyles((theme) => ({
     root: {
         display: 'flex',
+        width:'100%'
     },
     details: {
         display: 'flex',

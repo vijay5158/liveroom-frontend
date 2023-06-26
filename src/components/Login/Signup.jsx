@@ -1,8 +1,9 @@
 import { FormControl, FormHelperText, InputLabel, NativeSelect } from "@material-ui/core";
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authLogin, authSignup } from "../../actions/authAction";
 import { useDispatch } from "react-redux";
+import { authLogin, authSignup } from "../../redux/reducers/authReducer";
+
 const handleSlideSignup = () => {
     const sign_in_btn = document.querySelector("#sign-in-btn");
     const sign_up_btn = document.querySelector("#sign-up-btn");
@@ -19,10 +20,7 @@ const handleSlideSignup = () => {
 
 function Signup(props) {
     const dispatch = useDispatch()
-
-    const [state, setState] = React.useState({
-        userType: '',
-    });
+    const [loading, setLoading] = useState(false);
 
 
     const navigate = useNavigate();
@@ -51,15 +49,23 @@ function Signup(props) {
     };
     const handleSubmit = (event) => {
         event.preventDefault()
-        let isStudent = false;
+        let is_student = false;
+        let is_teacher = true;
         const { firstName, lastName, email, mobile, password, userType } = formDataSignup;
+        const name = firstName+" "+lastName;
+        if (email?.length > 0 && password?.length > 0 && name?.length > 0 && mobile?.length === 10){
         if (userType === "student") {
-            isStudent = true
+            is_student = true
+            is_teacher = false
         }
-        dispatch(authSignup(firstName, lastName, email, mobile, password, isStudent));
+        dispatch(authSignup({name, email, mobile, password, is_student, is_teacher},setLoading));
         setFormDataSignup(lastFormDataSignup);
         navigate('/');
         handleClose();
+    }
+    else {
+        alert('Please fill all data or data is incorrect!');
+      }
     }
     const signupContainer = document.querySelector('#signupContainer')
     useEffect(handleSlideSignup, [signupContainer])
@@ -83,8 +89,9 @@ function Signup(props) {
     }
     const handleSubmitLogin = (event) => {
         event.preventDefault()
+        setLoading(true);
         const { email, password } = formDataLogin;
-        dispatch(authLogin(email, password));
+        dispatch(authLogin(email, password, setLoading));
 
         setFormDataLogin(lastFormDataLogin);
         handleClose();
@@ -97,10 +104,8 @@ function Signup(props) {
     return (
         <>
             <div className="container max-w-[100%]" id="signupContainer">
-
                 <div className="forms-container">
                     <div className="signin-signup">
-
                         <form action="/" className="sign-up-form">
                             <h2 className="title">Sign up</h2>
                             <div className="input-field">
@@ -166,7 +171,7 @@ function Signup(props) {
                                 <i className="fas fa-lock"></i>
                                 <input type="password" onChange={handleChangeLogin} name="password" placeholder="Password" />
                             </div>
-                            <input type="submit" value="Login" onClick={handleSubmitLogin} className="btn bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)] solid" />
+                            <input type="submit" value="Login" disabled={loading} onClick={handleSubmitLogin} className="btn bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)] solid" />
                             <p className="social-text">Or Sign in with social platforms</p>
                             <div className="social-media">
                                 <a href="#" className="social-icon">

@@ -7,24 +7,21 @@ import { useParams } from 'react-router-dom';
 import { createAnmnt, getAnmnt } from '../../actions/classAction';
 import LoginDialog from "../Login/LoginDialog";
 import './style.css';
-import { useAuth } from '../../reducers/authReducer';
-import { useAnnouncements, useClasses } from '../../reducers/classReducer';
+import { createAnnouncement, getAnnouncements, getCurrentClass } from '../../redux/reducers/classReducer';
+import { useAccessToken } from '../../redux/reducers/authReducer';
+import { useUser } from '../../redux/reducers/userReducer';
 
 function Announcements(props) {
-    const authData = useAuth();
     const { slug } = useParams();
-    const classes = useClasses();
+    const accessToken = useAccessToken();
     const dispatch = useDispatch();
-    const announcements = useAnnouncements();
+    const userData = useUser();
+    const announcements = getAnnouncements();
     useEffect(() => {
         window.scrollTo(0, 0)
     }, [])
-    const Class = classes.filter((cls) => {
-
-        return cls.slug === slug
-
-    })
-    const classId = Class[0].id
+    const currentClass = getCurrentClass();
+    const classId = currentClass.id
     const initialFormData = Object.freeze({
         announcement: '',
         classroom: classId,
@@ -40,10 +37,10 @@ function Announcements(props) {
 
     }
     const handleSubmit = (e) => {
-        dispatch(createAnmnt(authData?.token, anmnt));
+        dispatch(createAnnouncement(accessToken, anmnt));
     }
 
-    if (authData?.token) {
+    if (accessToken) {
         return (
             <div style={{ marginTop: '20px' }}>
                 <div className="bulletins">
@@ -57,7 +54,7 @@ function Announcements(props) {
 
 
                 </div>
-                {(!authData.is_student) ? <div className="announcement" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {(!userData.is_student) ? <div className="announcement" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
 
                     <form action="" className="announcement-form" style={{ display: 'flex', flexDirection: 'row', width: '90%', alignItems: 'center', justifyContent: 'center' }}>
                         <div className="input-form">

@@ -8,18 +8,20 @@ import TextField from "@material-ui/core/TextField";
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { getCLS, joinCLS } from "../../../actions/classAction";
-import { useAuth } from "../../../reducers/authReducer";
-import { useClasses } from "../../../reducers/classReducer";
+import { useAccessToken } from "../../../redux/reducers/authReducer";
+import { useUser } from "../../../redux/reducers/userReducer";
+import { getAllClasses, joinCLS } from "../../../redux/reducers/classReducer";
 
 function JoinClass(props) {
-    const authData = useAuth();
-    const classes = useClasses();
-    const dispatch = useDispatch();
+    const accessToken = useAccessToken();
+    const userData = useUser();
+    const classes = getAllClasses();
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
     const [open, setOpen] = React.useState(false);
     const initialData = Object.freeze({
         slug: '',
-        student_id: authData?.userId,
+        student_id: userData?.userId,
     });
 
     const [data, setData] = useState(initialData);
@@ -44,8 +46,15 @@ function JoinClass(props) {
             return cls.slug === data.slug
         })
         if (duplicateClass.length === 0) {
-            dispatch(joinCLS(authData?.token, data));
+            if(data.slug!==""){
+                setLoading(true);
+                dispatch(joinCLS(accessToken, data, setOpen, setLoading));
         }
+        else {
+            alert('Fill class code!')
+        }
+     
+    }
         else {
             alert('You are already joined.')
         }
@@ -82,7 +91,7 @@ function JoinClass(props) {
                     <Button onClick={handleCloseClass} id="main-div" color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={handleJoin} color="primary">
+                    <Button onClick={handleJoin} disabled={loading} color="primary">
                         Join Class
                     </Button>
                 </DialogActions>

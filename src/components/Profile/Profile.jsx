@@ -6,9 +6,9 @@ import FormData from 'form-data';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { logout, updateUserData } from "../../actions/authAction";
 import './profile.css';
-import { useAuth } from "../../reducers/authReducer";
+import { useAccessToken } from "../../redux/reducers/authReducer";
+import { updateUserData, useUser } from "../../redux/reducers/userReducer";
 
 const StyledBreadcrumb = withStyles((theme) => ({
     root: {
@@ -27,7 +27,8 @@ const StyledBreadcrumb = withStyles((theme) => ({
 }))(Chip);
 
 function Profile(props) {
-    const authData = useAuth();
+    const authData = useUser();
+    const authToken = useAccessToken()
     const dispatch = useDispatch();
     const navigate = useNavigate()
     function handleClick(event) {
@@ -35,13 +36,13 @@ function Profile(props) {
         navigate('/');
     }
 
-    if (!authData.token) {
+    if (!authToken) {
 
         navigate('/')
     }
     const initialUserData = Object.freeze({
-        first_name: authData?.firstName,
-        last_name: authData?.lastName,
+        first_name: authData?.name?.split(" ")?.length>0 ? authData?.name?.split(" ")[0]:"",
+        last_name: authData?.name?.split(" ")?.length>1 ? authData?.name?.split(" ")[1] : "",
         password: '',
         email: authData?.email,
         mobile: authData?.mobile,
@@ -90,7 +91,7 @@ function Profile(props) {
 
         }
 
-        dispatch(updateUserData(updatedData, authData?.userId, authData?.token));
+        dispatch(updateUserData(updatedData, authData?.userId, authToken));
         setEditMode(false)
         document.getElementById('password').value = '';
     }

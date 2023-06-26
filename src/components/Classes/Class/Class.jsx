@@ -18,13 +18,16 @@ import { Link } from "react-router-dom";
 import Cardbg from '../../../images/classcardbg.jpg';
 import Coa from "../../../images/coa.jpg";
 import './class.css';
+import { useDispatch } from "react-redux";
+import { setCurrentClass } from "../../../redux/reducers/classReducer";
 
 const useStyles = makeStyles((theme) => ({
     root: {
         fontFamily: 'Audiowide',
         maxWidth: 345,
         backgroundImage: `url(${Cardbg})`,
-        boxShadow: '2px 10px 20px rgba(0,0,0, 0.5)'
+        boxShadow: '2px 10px 20px rgba(0,0,0, 0.5)',
+        margin: 'auto'
     },
     media: {
         height: 0,
@@ -47,7 +50,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-function Class(props) {
+function Class({classData}) {
+    const dispatch = useDispatch();
+
     useEffect(() => {
         window.scrollTo(0, 0)
     }, []);
@@ -58,31 +63,33 @@ function Class(props) {
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
-
+    const handleToClass = ()=>{
+        dispatch(setCurrentClass(classData));
+    }
     return (
         <>
 
             <Box p={1}>
-                <Link id='card-link' style={{ textDecoration: 'none', fontFamily: 'Audiowide' }} to={props.slug}  >
+                <Link id='card-link' onClick={handleToClass} style={{ textDecoration: 'none', fontFamily: 'Audiowide' }} to={classData.slug}  >
                     <div>
                         <Card className={classes.root}>
                             <CardHeader
                                 style={{ width: '300px', marginTop: '1rem', height: '60px', fontFamily: 'Audiowide, cursive' }}
                                 avatar={
                                     <Avatar aria-label="recipe" className={classes.avatar}>
-                                        {props.subject.charAt(0)}
+                                        {classData.subject.charAt(0)}
                                     </Avatar>
                                 }
-                                title={<p className='projName' style={{ fontSize: '1rem' }}>{props.subject}</p>}
-                                subheader={<p>{props.classname + " " + props.standard}</p>}
+                                title={<p className='projName' style={{ fontSize: '1rem' }}>{classData.subject}</p>}
+                                subheader={<p>{classData.class_name + " " + classData.standard}</p>}
                             />
                             <CardMedia
                                 className={classes.media}
                                 image={Coa}
-                                title={props.subject}
+                                title={classData.subject}
                             />
                             <CardContent>
-                                <p>      Teacher : {props.teacher}</p>
+                                <p>      Teacher : {classData.teacher}</p>
 
                             </CardContent>
                             <CardActions disableSpacing>
@@ -105,7 +112,7 @@ function Class(props) {
                             </CardActions>
                             <Collapse in={expanded} timeout="auto" unmountOnExit>
                                 <CardContent>
-                                    <p>{"Teacher - " + props.teacher}</p>
+                                    <p>{"Teacher - " + classData.teacher}</p>
 
                                 </CardContent>
                             </Collapse>

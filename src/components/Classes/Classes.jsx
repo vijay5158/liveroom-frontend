@@ -1,35 +1,35 @@
 import Box from '@material-ui/core/Box';
-import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import AddCircleOutlineRoundedIcon from '@material-ui/icons/AddCircleOutlineRounded';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
-import { getCLS } from "../../actions/classAction";
 import Loader from "../Loader/Loader";
 import LoginDialog from "../Login/LoginDialog";
 import Class from './Class/Class';
 import CreateClass from "./Class/Create";
 import JoinClass from "./Class/JoinClass";
-import { useAuth } from '../../reducers/authReducer';
-import { useClasses, useClassloading } from '../../reducers/classReducer';
+import { useAccessToken } from '../../redux/reducers/authReducer';
+import { useUser } from '../../redux/reducers/userReducer';
+import { getAllClasses, getClasses, useClassLoading } from '../../redux/reducers/classReducer';
 
 
 
 const Classes = (props) => {
-    const authData = useAuth();
-    const token = authData?.token;
-    const is_student = authData?.is_student;
-    const classes = useClasses();
+    const token = useAccessToken();
+    const userData = useUser();
+    const is_student = userData?.is_student;
+    const classes = getAllClasses();
+    
     const dispatch = useDispatch();
-    const loading = useClassloading();
+    const loading = useClassLoading();
     const [anchorEl, setAnchorEl] = useState(null)
 
     useEffect(() => {
         window.scrollTo(0, 0)
         if (token) {
             if (classes?.length === 0) {
-                dispatch(getCLS(token));
+                dispatch(getClasses(token));
             }
         }
     }, []);
@@ -51,27 +51,29 @@ const Classes = (props) => {
                         alignItems: 'flex-start'
                     }} >
                         {(classes.length === 0) ? <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', margin: 'auto', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}><h1>No Classes to show.</h1><hr />{(is_student) ? <p>Join a Class.</p> : <p>Create a Class.</p>}  </div> :
-                            <Box display="flex"
-                                flexWrap="wrap"
+                            <Box 
+                            // display="flex"
+                                // flexWrap="wrap"
                                 p={1}
                                 m={1}
-                                alignItems="center"
-                                justifyContent="flex-start"
+                                // alignItems="center"
+                                // justifyContent="center"
                                 margin="auto"
                                 maxWidth="1200px"
-                                padding="20px"
-
+                                // padding="20px"
+                                className='w-full grid grid-cols-1 px-2 sm:px-5 md:px-10 lg:px-15 py-4 gap-y-8 gap-x-4  
+                                sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4'
                                 marginTop='20px'
                                 borderRadius='10px'
                             >
 
-                                {classes.map((cls, index) => <Class key={index} clsId={cls.id} slug={cls.slug} classname={cls.class_name} subject={cls.subject} standard={cls.standard} teacher={cls.teachers} />)}
+                                {classes.map((cls, index) => <Class key={index} classData={cls} />)}
 
                             </Box>}
-                        <Button style={{ position: 'fixed', right: '2%', marginTop: '1rem' }} aria-controls="simple-menu" aria-haspopup="true"
+                        <button className='fixed right-[2%] mt-[1rem] z-10 rounded-full p-2 bg-[linear-gradient(45deg,#FF2C4F,#0B31D0)] shadow-lg' aria-controls="simple-menu" aria-haspopup="true"
                             onClick={handleClick}>
-                            <AddCircleOutlineRoundedIcon style={{ color: 'rgb(88,65,139)' }} fontSize='large' />
-                        </Button>
+                            <AddCircleOutlineRoundedIcon className='text-white' fontSize='large' />
+                        </button>
                         <Menu
                             id="simple-menu"
                             anchorEl={anchorEl}

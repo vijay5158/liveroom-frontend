@@ -6,14 +6,18 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 import TextField from "@material-ui/core/TextField";
 import React, { useState } from 'react';
-import { connect, useDispatch } from "react-redux";
-import { createCLS, getCLS } from "../../../actions/classAction";
-import { useAuth } from "../../../reducers/authReducer";
+import { useDispatch } from "react-redux";
+import { useAccessToken } from "../../../redux/reducers/authReducer";
+import { useUser } from "../../../redux/reducers/userReducer";
+import { createCLS } from "../../../redux/reducers/classReducer";
+import { Input, Typography } from "@material-ui/core";
 
 function CreateClass(props) {
-   const authData = useAuth();
-   const dispatch = useDispatch();
+    const accessToken = useAccessToken();
+    const userData = useUser();
+    const dispatch = useDispatch();
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const initialFormData = Object.freeze({
         classname: '',
         subject : '',
@@ -30,17 +34,17 @@ function CreateClass(props) {
     };
     const createClass = (event)=>{
         event.preventDefault();
+    if (FormData.classname !== '' && FormData.standard !== '' && FormData.subject !== '') {
+        setLoading(true);
         const cls = {
             class_name : FormData.classname,
             standard : FormData.standard,
             subject : FormData.subject,
-            teachers : authData?.email
+            teachers : userData?.email
         }
-        console.log(cls)
-        dispatch(createCLS(authData?.token,cls));
-        setOpen(false);
+        dispatch(createCLS(accessToken,cls,setOpen, setLoading));
     }
-
+    }
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -48,23 +52,22 @@ function CreateClass(props) {
     const handleCloseclass = () => {
         setOpen(false);
     };
-
     return (
         <div>
             <a  onClick={handleClickOpen}>
                 Create Class
             </a>
+            
             <Dialog open={open} onClose={handleCloseclass} aria-labelledby="form-dialog-title">
                 <DialogTitle id="form-dialog-title">Create Class</DialogTitle>
-                <form action="/classes/">
+                <div >
                     <DialogContent>
                     <DialogContentText>
                         To create a class , please enter class details.
 
                     </DialogContentText>
-
-                    <TextField
-                        autoFocus
+                    <Typography variant="body1">&#8288;Columns</Typography>
+                    <Input
                         margin="dense"
                         id="classname"
                         label="Class Name"
@@ -72,25 +75,26 @@ function CreateClass(props) {
                         fullWidth
                         name="classname"
                         onChange={handleChange}
+                        value={FormData?.classname}
                     />
                     <TextField
-                        autoFocus
                         margin="dense"
                         id="subject"
                         label="Subject"
                         type="text"
                         fullWidth
                         onChange={handleChange}
+                        value={FormData?.subject}
                         name = "subject"
                     />
                     <TextField
-                        autoFocus
                         margin="dense"
                         id="standard"
                         label="Standard"
                         type="text"
                         fullWidth
                         name="standard"
+                        value={FormData?.standard}
                         onChange={handleChange}
                     />
                 </DialogContent>
@@ -98,12 +102,12 @@ function CreateClass(props) {
                     <Button onClick={handleCloseclass} color="primary">
                         Cancel
                     </Button>
-                    <Button type="submit" onClick={createClass} color="primary">
+                    <Button type="submit" disabled={loading} onClick={createClass} color="primary">
                         Create Class
                     </Button>
 
                 </DialogActions>
-                </form>
+                </div>
                 </Dialog>
         </div>
     );

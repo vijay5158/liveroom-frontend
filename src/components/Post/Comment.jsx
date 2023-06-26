@@ -16,7 +16,7 @@ function Comment(props) {
                         <Avatar src={(props.userImg != null) ? `http://localhost:8000${props.userImg}` : null} alt={props.name} />
                         <Typography style={{ marginLeft: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} gutterBottom variant="subtitle1">
                             <span style={{ fontSize: '1rem' }}>{props.name}</span>
-                            <span style={{ fontSize: '0.7rem', color: 'gray' }}>{props.date + "  " + props.time.slice(0, 8)}</span>
+                            <span style={{ fontSize: '0.7rem', color: 'gray' }}>{props.time}</span>
                         </Typography>
 
                     </div>

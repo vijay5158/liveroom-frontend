@@ -5,20 +5,19 @@ import { makeStyles } from "@material-ui/core/styles";
 import CloseIcon from '@material-ui/icons/Close';
 import SendIcon from '@material-ui/icons/Send';
 import FormData from 'form-data';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAnmnt, getCLS } from "../../../actions/classAction";
-import { createCommentSuccess, createPost, createPostSuccess, getComment, getPost } from "../../../actions/postAction";
 import Cardbg from '../../../images/classcardbg.jpg';
 import Loader from "../../Loader/Loader";
 import Post from "../../Post/Post";
 import './cardStyle.css';
 import SideBar from "./SideBar";
-import { useClasses, useClassloading } from "../../../reducers/classReducer";
-import { useAuth } from "../../../reducers/authReducer";
-import { usePosts, useclassSlug } from "../../../reducers/postReducer";
-
+import { getClasses, getCurrentClass, getCurrentClassSuccess, useClassLoading } from "../../../redux/reducers/classReducer";
+import { createCommentSuccess, createPost, createPostSuccess, usePosts } from "../../../redux/reducers/postReducer";
+import { useAccessToken } from "../../../redux/reducers/authReducer";
+import { useUser } from "../../../redux/reducers/userReducer";
+import Posts from "../../Post/Posts";
 
 
 
@@ -27,7 +26,7 @@ const useStyles = makeStyles((theme) => (
         root: {
             minWidth: 275,
             backgroundImage: `url(${Cardbg})`,
-            width: '70vw'
+            width: '100%'
         },
         bullet: {
             display: 'inline-block',
@@ -65,90 +64,81 @@ const useStyles = makeStyles((theme) => (
             marginBottom: theme.spacing(2),
         }
     }));
+
 function ClassDetail(props) {
-    let webSocket = undefined;
-    const Classes = useClasses();
-    const loading = useClassloading()
-    const authData = useAuth();
+  const webSocket = useRef(null);
+    const Classes = getClasses();
+    const loading = useClassLoading()
     const posts = usePosts();
+    const postIds = Object.keys(posts);
+    const accessToken = useAccessToken();
+    const userData = useUser();
     // const classSlug = useclassSlug();
     const dispatch = useDispatch();
     // const Classes = props.classes;
     const { slug } = useParams();
     const [expand, setExpand] = useState(false);
     const navigate = useNavigate();
-    const Class = Classes.filter((cls) => {
-
-        return cls.slug === slug
-
-    })
+    const currentClass = getCurrentClass();
     useEffect(() => {
         window.scrollTo(0, 0)
-        dispatch(getPost(authData?.token, slug));
-        dispatch(getComment(authData?.token, slug));
-        dispatch(getAnmnt(authData?.token, slug));
-        if (localStorage.getItem('classConnections') != null) {
+        dispatch(getCurrentClassSuccess(accessToken,slug));
+        // dispatch(getPost(userData?.token, slug));
+        // dispatch(getComment(userData?.token, slug));
+        // dispatch(getAnmnt(userData?.token, slug));
+        // if (localStorage.getItem('classConnections') != null) {
 
-            const connections = JSON.parse(localStorage.getItem('classConnections'))
-            if (!connections['slugs'].includes(slug)) {
-                connect(slug);
-            }
-        }
+        //     const connections = JSON.parse(localStorage.getItem('classConnections'))
+        //     if (!connections['slugs'].includes(slug)) {
+        //         connect(slug);
+        //     }
+        // }
 
-        else {
-            connect(slug);
-        }
+        // else {
+        //     connect(slug);
+        // }
     }, [])
 
 
-    const connect = useCallback((slug) => {
-        const path = `ws://localhost:8000/ws/class/${slug}/`;
-        webSocket = new WebSocket(path);
-        webSocket.onopen = () => {
-            console.log("WebSocket open");
-        };
-        webSocket.onmessage = e => {
+    useEffect(() => {
+
+        const path = `ws://paathshaala.me/ws/class/${slug}/`;
+
+          webSocket.current = new WebSocket(path);
+          webSocket.current.onopen = () => {
+            webSocket.current.send(JSON.stringify({
+              type: "auth",
+              headers: {
+                Authorization: `Bearer ${accessToken}`
+              }
+            }));
+          };
+          webSocket.current.onmessage = e => {
             const data = JSON.parse(e.data);
             if (data.comment != null) {
-                dispatch(createCommentSuccess(data.comment))
-
-
+              dispatch(createCommentSuccess(data.comment))
             }
             if (data.post != null) {
-                dispatch(createPostSuccess(data.post));
-
+              dispatch(createPostSuccess(data.post));
             }
-
+          };
+          webSocket.current.onerror = e => {
+            console.log(e);
+          };
+          webSocket.current.onclose = () => {
+          };
+    
+        return () => {
+          webSocket?.current?.close();
         };
-        webSocket.onerror = e => {
-            console.log(e.message);
-        };
-        webSocket.onclose = () => {
-            console.log("WebSocket closed let's reopen");
-            //   connect();
-        };
-
-        if (localStorage.getItem('classConnections') != null) {
-            let connections = JSON.parse(localStorage.getItem('classConnections'));
-            let slugs = connections['slugs'];
-            slugs = [...slugs, slug];
-            connections = { 'slugs': slugs };
-            localStorage.setItem('classConnections', JSON.stringify(connections));
-        }
-        else {
-            const slugs = [slug];
-            const connections = { 'slugs': slugs };
-            localStorage.setItem('classConnections', JSON.stringify(connections));
-        }
-    }
-        , [webSocket]);
-    const disconnect = useCallback(() => {
-        webSocket.close();
-    }, [webSocket]);
+      }, [slug]);
+    // const disconnect = useCallback(() => {
+    //     webSocket.close();
+    // }, [webSocket]);
 
 
 
-    const classId = Class[0]?.id
+    const classId = currentClass?.id
     const initialFormData = Object.freeze({
         text: '',
         classroom: classId
@@ -182,7 +172,7 @@ function ClassDetail(props) {
         post.append('file', postImage.file[0]);
         post.append('file_name', postImage.file_name);
         }
-        dispatch(createPost(authData?.token, post));
+        dispatch(createPost(accessToken, post));
 
         setExpand(false)
     }
@@ -190,8 +180,8 @@ function ClassDetail(props) {
     classes.cardContent = undefined;
     classes.card = undefined;
     const refresh = () => {
-        dispatch(getPost(authData?.token, slug));
-        dispatch(getComment(authData?.token, slug));
+        // dispatch(getPost(accessToken, slug));
+        // dispatch(getComment(userData?.token, slug));
     }
 
     if (Classes.length === 0) {
@@ -205,22 +195,22 @@ function ClassDetail(props) {
         else {
             return (
                 <>
-                    <SideBar slug={slug} isStudent={authData?.is_student} />
-                    <div className='card-div'>
+                    {/* <SideBar slug={slug} isStudent={userData?.is_student} /> */}
+                    <div className='card-div sm:w-[70vw] w-[95vw]'>
                         <Card className={classes.root}>
 
                             <CardContent>
 
                                 <h4 style={{ color: '#58418b', fontSize: '1rem' }}>
-                                    {Class[0].class_name + " " + Class[0].standard}
+                                    {currentClass.class_name + " " + currentClass.standard}
                                 </h4>
                                 <h2 className="projName" style={{ color: '#58418b', fontSize: '2rem' }}>
-                                    {Class[0].subject}
+                                    {currentClass.subject}
                                 </h2>
-                                {(!authData?.is_student) ? <p style={{ color: 'gray', fontSize: '0.8rem' }}>
-                                    Class code: {Class[0].slug}
+                                {(!userData?.is_student) ? <p style={{ color: 'gray', fontSize: '0.8rem' }}>
+                                    Class code: {currentClass.slug}
                                 </p> : <p style={{ color: 'gray', fontSize: '0.8rem' }}>
-                                    Class Teacher: {Class[0].teachers}
+                                    Class Teacher: {currentClass.teacher}
                                 </p>}
 
                                 {/*    <Typography variant="body2" component="p">*/}
@@ -234,9 +224,9 @@ function ClassDetail(props) {
                             </CardActions>
                         </Card>
                     </div>
-                    <div className="post-div">
-                        <Container maxWidth="md" id='postContainer' component="main">
-                            {(!authData?.is_student) ?
+                    <div className="post-div sm:w-[70vw] w-[95vw]">
+                        {/* <Container maxWidth="md" id='postContainer' component="main">
+                            {(!userData?.is_student) ?
 
                                 <div className="add-post">
 
@@ -263,8 +253,8 @@ function ClassDetail(props) {
                                     </form>
                                 </div> : null}
                             {posts.map((post, index) => <Post key={index} firstName={post.user.first_name} slug={slug} lastName={post.user.last_name} profileImg={post.user.profile_img} text={post.text} file_name={post.file_name} file={post.file} user={post.user} date={post.date} time={post.time} post_id={post.id} />)}
-                        </Container>
-
+                        </Container> */}
+                        <Posts />
                     </div>
                 </>
             )

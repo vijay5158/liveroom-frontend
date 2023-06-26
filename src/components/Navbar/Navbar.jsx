@@ -8,19 +8,16 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import { logout } from "../../actions/authAction";
-import { handleLogout } from "../../actions/classAction";
 import logo from "../../images/logo.png";
 import Login from '../Login/LoginDialog';
 import './style.css';
-import { useAuth } from '../../reducers/authReducer';
+import { authLogout, useAccessToken } from '../../redux/reducers/authReducer';
 
 
 
 const Navbar = (props) => {
-    const authData = useAuth();
     const dispatch = useDispatch();
-    const token = authData?.token;
+    const token = useAccessToken();
     const scripts = () => {
         const burger = document.querySelector('.burger')
         const navbar = document.querySelector('.navbar')
@@ -70,9 +67,7 @@ const Navbar = (props) => {
     const handleCloseLogout = (event) => {
         event.preventDefault();
         setAnchorEl(null);
-        dispatch(handleLogout())
-        dispatch(logout())
-
+        dispatch(authLogout())
     }
     const handleClose = () => {
         setAnchorEl(null);

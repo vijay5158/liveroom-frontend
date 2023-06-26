@@ -1,34 +1,34 @@
-import { useEffect, useState } from "react";
+import React ,{ Suspense, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import { authCheckState } from "./actions/authAction";
 import './App.css';
-import Announcements from "./components/Announcements/Announcements";
-import ClassDetail from "./components/Classes/ClassDetail/ClassDetail";
-import Classes from "./components/Classes/Classes";
 import Footer from "./components/Footer/Footer";
 import Contact from "./components/Home/Contact";
 import Home from "./components/Home/Home";
 import Loader from "./components/Loader/Loader";
 import Navbar from './components/Navbar/Navbar';
-import Profile from "./components/Profile/Profile";
 import PrivateRoute from "./utils/PrivateRoute";
-import { useAuth } from "./reducers/authReducer";
-import { getCLS } from "./actions/classAction";
+import { getClasses } from './redux/reducers/classReducer';
+import { useAccessToken, useLoading } from "./redux/reducers/authReducer";
+const Announcements = React.lazy(() => import("./components/Announcements/Announcements"));
+const ClassDetail = React.lazy(() => import("./components/Classes/ClassDetail/ClassDetail"));
+const Classes = React.lazy(() => import("./components/Classes/Classes"));
+const Profile = React.lazy(() => import("./components/Profile/Profile"));
 
 function App(props) {
     const [loading, setLoading] = useState(true);
-    const auth = useAuth();
+    const authLoading = useLoading();
+    const authToken = useAccessToken()
     const dispatch = useDispatch();
     useEffect(()=> {
-        dispatch(authCheckState())
-        if(auth.token){
-            dispatch(getCLS(auth.token));
+        // dispatch(authCheckState())
+        if(authToken){
+            dispatch(getClasses(authToken));
         }
         setLoading(false)
             }
     , [])
-    if(auth?.loading || loading){
+    if(authLoading || loading){
         return (<Loader/>)
     }
     else {
@@ -41,11 +41,11 @@ function App(props) {
                         </Route>
                         <Route exact path='/contact/' element={<Contact />}/>
                         <Route element={<PrivateRoute/>}>
-                        <Route exact path='/my-account/' element={<Profile />}/>
-                        <Route exact path='/classes/:slug' element={<ClassDetail />}/>
-                        <Route exact path='/classes/' element={<Classes {...props}/>}>
+                        <Route exact path='/my-account/' element={<Suspense fallback = { <Loader /> } ><Profile /></Suspense>}/>
+                        <Route exact path='/classes/:slug' element={<Suspense fallback = { <Loader /> } ><ClassDetail /></Suspense>}/>
+                        <Route exact path='/classes/' element={<Suspense fallback = { <Loader /> } ><Classes {...props}/></Suspense>}>
                         </Route>
-                        <Route exact path='/announcements/:slug' element={<Announcements {...props}/>}>
+                        <Route exact path='/announcements/:slug' element={<Suspense fallback = { <Loader /> } ><Announcements {...props}/></Suspense>}>
                         </Route>
                         </Route>
                     </Routes>

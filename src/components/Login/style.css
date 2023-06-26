@@ -39,7 +39,7 @@ form {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding: 0rem 5rem;
+    /* padding: 0rem 5rem; */
     transition: all 0.2s 0.7s;
     overflow: hidden;
     grid-column: 1 / 2;
@@ -371,7 +371,7 @@ form.sign-in-form {
 
 @media (max-width: 570px) {
     form {
-        padding: 0 1.5rem;
+        /* padding: 0 1.5rem; */
     }
 
     .image {

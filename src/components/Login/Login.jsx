@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { authLogin } from "../../actions/authAction";
-import { useAuth } from '../../reducers/authReducer';
-
+import { authLogin } from '../../redux/reducers/authReducer';
 
 
 const handleSlide = () => {
@@ -21,9 +19,9 @@ const handleSlide = () => {
 }
 
 function Login(props) {
-    const authData = useAuth();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
 
     const initialFormDataLogin = Object.freeze({
         email: '',
@@ -35,7 +33,6 @@ function Login(props) {
     })
     const [formDataLogin, setFormDataLogin] = useState(initialFormDataLogin);
     const handleChangeLogin = (event) => {
-        console.log(event.target.value)
         setFormDataLogin({
             ...formDataLogin,
             [event.target.name]: event.target.value.trim(),
@@ -46,8 +43,9 @@ function Login(props) {
     }
     const handleSubmitLogin = (event) => {
         event.preventDefault()
+        setLoading(true);
         const { email, password } = formDataLogin;
-        dispatch(authLogin(email, password));
+        dispatch(authLogin(email, password, setLoading));
 
         handleClose();
         navigate('/');
@@ -72,7 +70,7 @@ function Login(props) {
                                 <i className="fas fa-lock"></i>
                                 <input type="password" onChange={handleChangeLogin} name="password" placeholder="Password" />
                             </div>
-                            <input type="submit" value="Login" onClick={handleSubmitLogin} className="btn solid" />
+                            <input type="submit" value="Login" disabled={loading} onClick={handleSubmitLogin} className="btn solid" />
                             <p className="social-text">Or Sign in with social platforms</p>
                             <div className="social-media">
                                 <a href="#" className="social-icon">
