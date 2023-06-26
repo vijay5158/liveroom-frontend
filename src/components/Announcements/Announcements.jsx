@@ -4,7 +4,6 @@ import SendIcon from '@material-ui/icons/Send';
 import React, { useEffect, useState } from 'react';
 import { connect, useDispatch } from "react-redux";
 import { useParams } from 'react-router-dom';
-import { createAnmnt, getAnmnt } from '../../actions/classAction';
 import LoginDialog from "../Login/LoginDialog";
 import './style.css';
 import { createAnnouncement, getAnnouncements, getCurrentClass } from '../../redux/reducers/classReducer';
