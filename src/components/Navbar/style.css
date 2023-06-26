@@ -21,18 +21,20 @@ html {
 }
 
 .logo {
-    width: 20%;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .logo img {
-    width: 100%;
+    width: 35%;
     margin: 5px;
 
 }
-
+.logo h6{
+    font-family: 'Audiowide', cursive;
+}
 .navbar {
     display: flex;
     align-items: center;
@@ -435,7 +437,7 @@ img.vert-move {
     }
 
     .navbar {
-        height: 325px;
+        height: 250px;
         flex-direction: column;
         transition: all 0.7s ease-out;
     }
@@ -450,6 +452,7 @@ img.vert-move {
         position: absolute;
         /*display: block;*/
         right: 5%;
+        top: 10px;
         /*text-align: start;*/
         /*margin-top: -14rem;*/
     }

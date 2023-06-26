@@ -10,6 +10,7 @@ import Navbar from './components/Navbar/Navbar';
 import PrivateRoute from "./utils/PrivateRoute";
 import { getClasses } from './redux/reducers/classReducer';
 import { useAccessToken, useLoading } from "./redux/reducers/authReducer";
+import { getUserData } from "./redux/reducers/userReducer";
 const Announcements = React.lazy(() => import("./components/Announcements/Announcements"));
 const ClassDetail = React.lazy(() => import("./components/Classes/ClassDetail/ClassDetail"));
 const Classes = React.lazy(() => import("./components/Classes/Classes"));
@@ -23,6 +24,7 @@ function App(props) {
     useEffect(()=> {
         // dispatch(authCheckState())
         if(authToken){
+            dispatch(getUserData(authToken));
             dispatch(getClasses(authToken));
         }
         setLoading(false)

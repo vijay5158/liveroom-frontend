@@ -8,7 +8,7 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from 'react-router-dom';
-import logo from "../../images/logo.png";
+import logo from "../../images/logo1.png";
 import Login from '../Login/LoginDialog';
 import './style.css';
 import { authLogout, useAccessToken } from '../../redux/reducers/authReducer';
@@ -74,9 +74,14 @@ const Navbar = (props) => {
     };
     return (
         <>
-            <nav className="navbar nav background1 h-nav-resp px-4">
-                <ul className="nav-list w-[100%] v-class-resp">
-                    <div className="logo w-[15%]"><img className='w-[80%]' src={logo} alt="logo" /></div>
+            <nav className="navbar nav background1 h-nav-resp sm:h-[70px] px-4">
+                <ul className="nav-list justify-end sm:justify-start w-[100%] gap-2 v-class-resp h-full">
+                  <div className="hidden sm:flex h-full">
+                    <div className="logo h-full">
+                        <img src={logo} alt="logo" className='h-[60px]' />
+                        <h6 className='text-xl text-[#58418b] font-semibold'>PaathShaala</h6>
+                    </div>
+                    </div>
                     <li><Link to="/">Home</Link></li>
                     <li><Link to="/classes/">Classes</Link></li>
 

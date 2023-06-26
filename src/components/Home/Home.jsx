@@ -24,7 +24,7 @@ function Home(props) {
                 <div className="box-main">
                     {(!token) ? <div className="w-[60%] flex flex-col items-center justify-center gap-2">
                         <p className="text-big1">Get more time to teach and inspire learners with <span
-                            className="projName">LiveRoom</span></p>
+                            className="projName">PaathShaala</span></p>
                         <div className="main-para"><p className="text-small1">A free and easy tool helping educators
                             efficiently manage
                             and assess progress, while enhancing connections with learners from school, from home,
